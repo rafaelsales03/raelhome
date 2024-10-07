@@ -1,5 +1,5 @@
+import type { PropertiesRepository } from '@/database/repositories/properties';
 import { Property } from '@/entities/property';
-import { properties } from '@/http/controllers/properties/route';
 
 export type CreatePropertyUseCaseRequest = {
 	name: string;
@@ -15,14 +15,16 @@ type CreatePropertyUseCaseResponse = {
 };
 
 export class CreatePropertyUseCase {
-	execute({
+	constructor(private repository: PropertiesRepository) {}
+
+	async execute({
 		name,
 		totalValue,
 		numberOfRooms,
 		city,
 		state,
 		size,
-	}: CreatePropertyUseCaseRequest): CreatePropertyUseCaseResponse {
+	}: CreatePropertyUseCaseRequest): Promise<CreatePropertyUseCaseResponse> {
 		const property = new Property({
 			name,
 			totalValue,
@@ -32,7 +34,8 @@ export class CreatePropertyUseCase {
 			size,
 		});
 
-		properties.push(property);
-		return { property };
+		const createdProperty = await this.repository.create(property);
+
+		return { property: createdProperty };
 	}
 }
